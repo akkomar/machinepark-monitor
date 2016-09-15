@@ -1,8 +1,8 @@
 package pl.akkomar.machinepark.monitor
 
 import akka.actor.{ActorSystem, Cancellable}
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.{ActorAttributes, ActorMaterializer, Supervision}
 import akka.{Done, NotUsed}
 import pl.akkomar.machinepark.api.{MachineStatus, MachineUrl}
 
@@ -19,7 +19,10 @@ class Monitor(alertSink: Sink[Alert, Future[Done]] = Monitor.DefaultAlertSink,
       Source.tick(0.seconds, checkRepeatPeriod, urls.toIndexedSeq)
     }.mapConcat(identity)
 
-    val machineStatuses = machineDetailsTicks.zip(machineUrlsToCheck).mapAsync(1) { case (_, machineUrl) => fetchStatus(machineUrl) }
+    val machineStatuses = machineDetailsTicks
+      .zip(machineUrlsToCheck)
+      .mapAsync(1) { case (_, machineUrl) => fetchStatus(machineUrl) }
+      .withAttributes(ActorAttributes.supervisionStrategy(Supervision.resumingDecider))
     val alerts = machineStatuses.map(checkStatus).filter(_.isDefined).map(_.get)
 
     alerts.runWith(alertSink)
