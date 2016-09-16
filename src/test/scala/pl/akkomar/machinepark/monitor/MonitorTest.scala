@@ -21,7 +21,7 @@ class MonitorTest extends FlatSpec with Eventually {
   implicit override val patienceConfig =
     PatienceConfig(timeout = scaled(Span(1, Second)), interval = scaled(Span(5, Millis)))
 
-  "Monitor" should "work fine" in {
+  "Monitor" should "send alerts to alert sink" in {
     val alerts = scala.collection.mutable.MutableList.empty[Alert]
     val alertSink: Sink[Alert, Future[Done]] = Sink.foreach[Alert](alerts += _)
     val machineDetailsTicks = Source(List.fill(4)(()))
