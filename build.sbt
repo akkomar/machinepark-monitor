@@ -12,5 +12,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.10",
   "ch.qos.logback" % "logback-classic" % "1.1.3",
 
+  "com.datastax.cassandra" % "cassandra-driver-core" % "3.1.0",
+
   "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )
